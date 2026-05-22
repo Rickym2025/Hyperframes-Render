@@ -42,7 +42,6 @@ jobs:
         with:
           node-version: '22'
 
-      # Librerie di sistema necessarie a Headless Chrome e FFmpeg
       - name: Install System Dependencies
         run: |
           sudo apt-get update -y
@@ -53,26 +52,16 @@ jobs:
             libxcb1 libxext6 libxfixes3 libxi6 libxrender1 libxss1 libxtst6 \
             fonts-liberation ca-certificates xvfb wget curl ffmpeg
 
-      - name: Install Node Dependencies (Hyperframes)
+      - name: Install Node Dependencies
         run: npm install
 
-      - name: Controlla se i Secret sono vuoti
-        run: |
-          if [ -z "${{ secrets.R2_ACCESS_KEY_ID }}" ]; then
-            echo "ERRORE: R2_ACCESS_KEY_ID è vuoto! GitHub non lo sta leggendo."
-            exit 1
-          else
-            echo "R2_ACCESS_KEY_ID è stato caricato correttamente."
-          fi  
-
-      - name: Setup AWS CLI (Cloudflare R2)
-        run: |
-          aws configure set aws_access_key_id ${{ secrets.R2_ACCESS_KEY_ID }}
-          aws configure set aws_secret_access_key ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          aws configure set default.region auto
-
       - name: Download User Assets from R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
         run: |
+          echo "Inizio download per il job: ${{ github.event.inputs.job_id }}"
           mkdir -p r2_assets
           aws s3 sync s3://home-tour/${{ github.event.inputs.job_id }}/ r2_assets/ \
             --endpoint-url ${{ secrets.R2_ENDPOINT_URL }}
@@ -100,15 +89,17 @@ jobs:
             printf "{}" > public/input.json
           fi
 
-      # NUOVO STEP: Esegue il nostro script Node per iniettare i dati nell'HTML
       - name: Inject Data into Template
         run: node injector.js
 
-      # NUOVO STEP: Renderizza con Hyperframes
       - name: Render Video
         run: npx hyperframes render index.html out.mp4
 
       - name: Upload Video to R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
         run: |
           aws s3 cp out.mp4 \
             s3://home-tour/${{ github.event.inputs.job_id }}/video_finale.mp4 \
