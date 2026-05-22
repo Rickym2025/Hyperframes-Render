@@ -28,13 +28,12 @@
       overflow: hidden; 
     }
     
-    /* Contenitore Scena (Transizione liquida iniziale) */
+    /* Contenitore Scena (Ripristinato senza clip-path per evitare lo schermo nero) */
     .scene-container { 
       position: absolute; 
       inset: 0; 
       opacity: 0; 
       overflow: hidden; 
-      clip-path: circle(0% at 50% 50%); /* Rivelazione a cerchio liquido */
     }
     
     .scene-media { 
@@ -48,15 +47,15 @@
     .overlay-vignette { position: absolute; inset: 0; background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.8) 120%); }
     .overlay-bottom { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 40%); }
     
-    /* Filtro luce dorata dinamica */
+    /* Filtro luce dorata dinamica e soffusa */
     .light-leak {
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at 10% 10%, rgba(201, 169, 110, 0.45) 0%, transparent 70%);
+      background: radial-gradient(circle at 10% 10%, rgba(201, 169, 110, 0.3) 0%, transparent 70%);
       mix-blend-mode: screen;
       pointer-events: none;
       z-index: 10;
-      opacity: 0;
+      opacity: 0.8;
     }
 
     /* Il Badge Elegante */
@@ -76,7 +75,6 @@
 </head>
 <body>
   
-  <!-- Aggiunto data-start="0" richiesto da Hyperframes -->
   <div id="stage" data-composition-id="premium-video" data-start="0" data-width="1080" data-height="1920">
     <!-- Bande Cinematiche -->
     <div class="cinema-bar bar-top" id="bar-top"></div>
@@ -103,15 +101,11 @@
   <script>
     window.__timelines = window.__timelines || {};
     
-    // Controlliamo se n8n/injector ha generato una timeline "tl"
     if (typeof tl !== 'undefined') {
-      tl.paused(true); // Forza lo stato in pausa per permettere il rendering
+      tl.paused(true); 
       window.__timelines["premium-video"] = tl;
-      console.log("Timeline principale registrata con successo su premium-video.");
     } else {
-      // Paracadute di emergenza: se non trova "tl", esporta tutte le animazioni attive della pagina
       window.__timelines["premium-video"] = gsap.exportRoot().pause();
-      console.warn("Timeline globale 'tl' non rilevata direttamente. Usato exportRoot di sicurezza.");
     }
   </script>
 </body>
