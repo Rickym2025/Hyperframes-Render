@@ -84,9 +84,10 @@ jobs:
           INPUT_PROPS: ${{ github.event.inputs.input_props }}
         run: |
           if [ "$INPUT_PROPS" != "{}" ] && [ -n "$INPUT_PROPS" ]; then
-            printf "%s" "$INPUT_PROPS" > public/input.json
+            # Avvolge in modo sicuro i dati nella chiave 'inputProps' richiesta da injector.js
+            echo "{\"inputProps\": $INPUT_PROPS}" > public/input.json
           else
-            printf "{}" > public/input.json
+            echo "{\"inputProps\": {}}" > public/input.json
           fi
 
       - name: Select Template
@@ -106,9 +107,6 @@ jobs:
 
       - name: Diagnostica - Codice Injector ed HTML
         run: |
-          echo "==== CODICE DI INJECTOR.JS ===="
-          cat injector.js
-          echo "==============================="
           echo "==== CONTENUTO DI INDEX.HTML GENERATO ===="
           cat index.html
           echo "=========================================="
