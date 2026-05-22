@@ -1,13 +1,32 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=1080, height=1920" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;800;900&family=Playfair+Display:ital@1&display=swap');
     
-    body { margin: 0; background: #000; overflow: hidden; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body { 
+      margin: 0; 
+      width: 1080px; 
+      height: 1920px; 
+      overflow: hidden; 
+      background: #000; 
+    }
     
-    #stage { width: 1080px; height: 1920px; position: relative; background: #000; overflow: hidden; }
+    #stage { 
+      width: 1080px; 
+      height: 1920px; 
+      position: relative; 
+      background: #000; 
+      overflow: hidden; 
+    }
     
     /* Contenitore Scena */
     .scene-container { position: absolute; inset: 0; opacity: 0; overflow: hidden; }
@@ -23,7 +42,9 @@
 
     /* Logo Reveal Iniziale */
     #intro-sequence { position: absolute; inset: 0; background: #050505; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    #intro-logo { max-width: 400px; max-height: 400px; filter: blur(20px); transform: scale(2); opacity: 0; }
+    
+    /* NOTA: Rimosso transform: scale(2) per evitare conflitti con GSAP. Lo scale iniziale va impostato nel JS */
+    #intro-logo { max-width: 400px; max-height: 400px; filter: blur(20px); opacity: 0; }
     #intro-text { font-family: 'Playfair Display', serif; color: #c9a96e; font-size: 60px; margin-top: 40px; opacity: 0; font-style: italic; }
 
     /* Bande Nere Cinematiche */
@@ -34,7 +55,8 @@
 </head>
 <body>
   
-  <div id="stage" data-composition-id="premium-video" data-width="1080" data-height="1920">
+  <!-- Aggiunto data-start="0" per dire ad Hyperframes da dove far partire il rendering -->
+  <div id="stage" data-composition-id="premium-video" data-start="0" data-width="1080" data-height="1920">
     <!-- Bande Cinematiche -->
     <div class="cinema-bar bar-top" id="bar-top"></div>
     <div class="cinema-bar bar-bottom" id="bar-bottom"></div>
@@ -49,7 +71,29 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  
   <script>
+    // 1. Inizializziamo l'oggetto globale per Hyperframes
+    window.__timelines = window.__timelines || {};
+
+    // 2. Creiamo la timeline globale in pausa (fondamentale per consentire la riproduzione frame-by-frame)
+    const tl = gsap.timeline({ paused: true });
+
+    // 3. Registriamo la timeline usando l'ID corretto "premium-video"
+    window.__timelines["premium-video"] = tl;
+  </script>
+
+  <script>
+    /* 
+      Qui viene iniettato il tuo GSAP da injector.js. 
+      Siccome la costante 'tl' è già stata definita e registrata globalmente qui sopra, 
+      le tue istruzioni iniettate (es. tl.to(...)) si agganceranno in automatico ad essa, 
+      senza causare errori di compilazione!
+      
+      ⚠️ NOTA DI DESIGN: Poiché abbiamo rimosso "transform: scale(2)" dal CSS del logo, 
+      ricordati che nella prima istruzione di animazione del logo dovresti impostare lo scale iniziale a 2 via GSAP.
+      Esempio: tl.fromTo('#intro-logo', { scale: 2, filter: 'blur(20px)', opacity: 0 }, { scale: 1, filter: 'blur(0px)', opacity: 1, duration: 1.5 });
+    */
     /* INJECT_GSAP */
   </script>
 </body>
