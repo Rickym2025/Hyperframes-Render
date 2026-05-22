@@ -56,6 +56,15 @@ jobs:
       - name: Install Node Dependencies (Hyperframes)
         run: npm install
 
+      - name: Controlla se i Secret sono vuoti
+        run: |
+          if [ -z "${{ secrets.R2_ACCESS_KEY_ID }}" ]; then
+            echo "ERRORE: R2_ACCESS_KEY_ID è vuoto! GitHub non lo sta leggendo."
+            exit 1
+          else
+            echo "R2_ACCESS_KEY_ID è stato caricato correttamente."
+          fi  
+
       - name: Setup AWS CLI (Cloudflare R2)
         run: |
           aws configure set aws_access_key_id ${{ secrets.R2_ACCESS_KEY_ID }}
