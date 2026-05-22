@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=1080, height=1920" />
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;800;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght=500;800;900&display=swap');
     
     * {
       margin: 0;
@@ -28,31 +28,26 @@
       overflow: hidden; 
     }
     
-    /* Contenitore Scena (Taglio netto e Zoom-in iniziale aggressivo) */
     .scene-container { 
       position: absolute; 
       inset: 0; 
       opacity: 0; 
       overflow: hidden; 
-      transform: scale(0.85);
-      filter: blur(15px);
     }
     
     .scene-media { 
       width: 100%; 
       height: 100%; 
       object-fit: cover; 
-      transform: scale(1.4); 
+      transform: scale(1.3); 
     }
     
-    /* Vignettatura ad alto contrasto per dare un look sportivo */
     .overlay-vignette { 
       position: absolute; 
       inset: 0; 
       background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.9) 130%); 
     }
     
-    /* Flash bianco per transizioni veloci (Speed Ramp) */
     .flash-overlay {
       position: absolute;
       inset: 0;
@@ -62,7 +57,6 @@
       z-index: 30;
     }
 
-    /* Overlay Grafico Tecnologico HUD (Heads-Up Display) */
     .hud-overlay {
       position: absolute;
       inset: 0;
@@ -70,7 +64,6 @@
       z-index: 20;
     }
 
-    /* Il Badge Sportivo */
     .badge-wrap { position: absolute; top: 18%; left: 8%; overflow: hidden; border-radius: 4px; }
     .badge { 
       background: #c9a96e; 
@@ -81,15 +74,13 @@
       font-weight: 900; 
       text-transform: uppercase; 
       letter-spacing: 4px; 
-      transform: skewX(-10deg) translateY(100%); /* Look inclinato sportivo */
+      transform: skewX(-10deg) translateY(100%); 
     }
 
-    /* Logo Reveal Iniziale */
     #intro-sequence { position: absolute; inset: 0; background: #030303; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     #intro-logo { max-width: 400px; max-height: 400px; filter: blur(25px); opacity: 0; }
     #intro-text { font-family: 'DM Sans', sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: 6px; color: #c9a96e; font-size: 55px; margin-top: 40px; opacity: 0; }
 
-    /* Bande Nere Cinematiche */
     .cinema-bar { position: absolute; left: 0; width: 100%; height: 120px; background: #000; z-index: 90; }
     .bar-top { top: -120px; }
     .bar-bottom { bottom: -120px; }
@@ -98,20 +89,14 @@
 <body>
   
   <div id="stage" data-composition-id="premium-video" data-start="0" data-width="1080" data-height="1920">
-    <!-- Bande Cinematiche -->
     <div class="cinema-bar bar-top" id="bar-top"></div>
     <div class="cinema-bar bar-bottom" id="bar-bottom"></div>
-
-    <!-- Flash di transizione energetica -->
     <div class="flash-overlay" id="flash"></div>
 
-    <!-- HUD Overlay Vettoriale (Linee tecniche sportive) -->
     <div class="hud-overlay">
       <svg viewBox="0 0 1080 1920" fill="none" stroke="#c9a96e" stroke-width="2" style="width: 100%; height: 100%;">
-        <!-- Angoli di inquadratura tecnici -->
         <path d="M 60,100 L 60,60 L 100,60 M 980,100 L 980,60 L 940,60" />
         <path d="M 60,1820 L 60,1860 L 100,1860 M 980,1820 L 980,1860 L 940,1860" />
-        <!-- Mirino circolare centrale animato -->
         <circle id="hud-circle" cx="540" cy="960" r="130" stroke-dasharray="8 8" opacity="0.4"/>
         <line x1="540" y1="800" x2="540" y2="830" opacity="0.6" />
         <line x1="540" y1="1090" x2="540" y2="1120" opacity="0.6" />
@@ -120,7 +105,6 @@
       </svg>
     </div>
 
-    <!-- Logo Reveal -->
     <div id="intro-sequence">
       <img id="intro-logo" src="<!-- INJECT_LOGO -->" onerror="this.style.display='none'">
       <div id="intro-text">DriveMotion</div>
@@ -134,10 +118,8 @@
     /* INJECT_GSAP */
   </script>
 
-  <!-- REGISTRAZIONE BLINDATA PER HYPERFRAMES -->
   <script>
     window.__timelines = window.__timelines || {};
-    
     if (typeof tl !== 'undefined') {
       tl.paused(true); 
       window.__timelines["premium-video"] = tl;
