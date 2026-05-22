@@ -104,8 +104,11 @@ jobs:
         run: |
           node injector.js
 
-      - name: Diagnostica - Mostra HTML Generato
+      - name: Diagnostica - Codice Injector ed HTML
         run: |
+          echo "==== CODICE DI INJECTOR.JS ===="
+          cat injector.js
+          echo "==============================="
           echo "==== CONTENUTO DI INDEX.HTML GENERATO ===="
           cat index.html
           echo "=========================================="
