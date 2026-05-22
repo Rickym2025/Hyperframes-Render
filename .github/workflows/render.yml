@@ -93,7 +93,7 @@ jobs:
         run: node injector.js
 
       - name: Render Video
-        run: npx hyperframes render index.html out.mp4
+        run: npx hyperframes render --output out.mp4
 
       - name: Upload Video to R2
         env:
