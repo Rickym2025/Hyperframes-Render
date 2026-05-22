@@ -1,0 +1,116 @@
+name: Render Video Hyperframes
+
+on:
+  workflow_dispatch:
+    inputs:
+      job_id:
+        description: 'ID della cartella su Cloudflare R2'
+        required: true
+      user_email:
+        description: 'Email dell utente per notifica'
+        required: true
+      input_props:
+        description: 'JSON dei dati'
+        required: false
+        default: '{}'
+      formato:
+        description: 'verticale o orizzontale'
+        required: true
+        default: 'verticale'
+      piano:
+        description: 'pro o free'
+        required: true
+        default: 'free'
+      progetto:
+        description: 'hometour o DriveMotion'
+        required: true
+        default: 'hometour'
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
+jobs:
+  render-video:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Librerie di sistema necessarie a Headless Chrome e FFmpeg
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y \
+            libnss3 libnspr4 libatk1.0-0t64 libatk-bridge2.0-0t64 libcups2t64 \
+            libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 \
+            libasound2t64 libpango-1.0-0 libpangocairo-1.0-0 libx11-6 libx11-xcb1 \
+            libxcb1 libxext6 libxfixes3 libxi6 libxrender1 libxss1 libxtst6 \
+            fonts-liberation ca-certificates xvfb wget curl ffmpeg
+
+      - name: Install Node Dependencies (Hyperframes)
+        run: npm install
+
+      - name: Setup AWS CLI (Cloudflare R2)
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.R2_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          aws configure set default.region auto
+
+      - name: Download User Assets from R2
+        run: |
+          mkdir -p r2_assets
+          aws s3 sync s3://${{ secrets.R2_BUCKET_NAME }}/${{ github.event.inputs.job_id }}/ r2_assets/ \
+            --endpoint-url ${{ secrets.R2_ENDPOINT_URL }}
+          echo "Asset scaricati!"
+
+      - name: Prepare Public Assets
+        run: |
+          mkdir -p public
+          if [ -d "r2_assets" ]; then
+            find r2_assets/ -type f | while read f; do
+              REL_PATH="${f#r2_assets/}"
+              DEST="public/$REL_PATH"
+              mkdir -p "$(dirname "$DEST")"
+              cp "$f" "$DEST"
+            done
+          fi
+
+      - name: Write Input Props to File
+        env:
+          INPUT_PROPS: ${{ github.event.inputs.input_props }}
+        run: |
+          if [ "$INPUT_PROPS" != "{}" ] && [ -n "$INPUT_PROPS" ]; then
+            printf "%s" "$INPUT_PROPS" > public/input.json
+          else
+            printf "{}" > public/input.json
+          fi
+
+      # NUOVO STEP: Esegue il nostro script Node per iniettare i dati nell'HTML
+      - name: Inject Data into Template
+        run: node injector.js
+
+      # NUOVO STEP: Renderizza con Hyperframes
+      - name: Render Video
+        run: npx hyperframes render index.html out.mp4
+
+      - name: Upload Video to R2
+        run: |
+          aws s3 cp out.mp4 \
+            s3://${{ secrets.R2_BUCKET_NAME }}/${{ github.event.inputs.job_id }}/video_finale.mp4 \
+            --endpoint-url ${{ secrets.R2_ENDPOINT_URL }}
+
+      - name: Notify n8n
+        run: |
+          curl -X POST "https://n8n.rmstudio.app/webhook/consegna-video" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"email\": \"${{ github.event.inputs.user_email }}\",
+              \"video_url\": \"https://pub-e6dc3937b77b4aadbb8292b453366b93.r2.dev/${{ github.event.inputs.job_id }}/video_finale.mp4\",
+              \"jobId\": \"${{ github.event.inputs.job_id }}\"
+            }"
