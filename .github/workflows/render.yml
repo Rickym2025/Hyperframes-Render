@@ -103,7 +103,16 @@ jobs:
       - name: Inject Data into Template
         run: |
           node injector.js
-          rm -f template.html # Rimuove template.html per evitare il conflitto di composizioni multiple
+
+      - name: Diagnostica - Mostra HTML Generato
+        run: |
+          echo "==== CONTENUTO DI INDEX.HTML GENERATO ===="
+          cat index.html
+          echo "=========================================="
+
+      - name: Clean Environment
+        run: |
+          rm -f template.html # Rimuove il template per evitare il conflitto di composizioni multiple
 
       - name: Render Video
         run: npx hyperframes render --output out.mp4
