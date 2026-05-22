@@ -72,6 +72,10 @@ jobs:
           aws configure set default.region auto
 
       - name: Download User Assets from R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
         run: |
           mkdir -p r2_assets
           aws s3 sync s3://${{ secrets.R2_BUCKET_NAME }}/${{ github.event.inputs.job_id }}/ r2_assets/ \
@@ -109,6 +113,10 @@ jobs:
         run: npx hyperframes render index.html out.mp4
 
       - name: Upload Video to R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
         run: |
           aws s3 cp out.mp4 \
             s3://${{ secrets.R2_BUCKET_NAME }}/${{ github.event.inputs.job_id }}/video_finale.mp4 \
