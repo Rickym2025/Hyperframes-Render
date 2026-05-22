@@ -91,12 +91,13 @@ jobs:
 
       - name: Select Template
         run: |
-          if [ "${{ github.event.inputs.progetto }}" = "DriveMotion" ]; then
+          PROG_LOWER=$(echo "${{ github.event.inputs.progetto }}" | tr '[:upper:]' '[:lower:]')
+          if [ "$PROG_LOWER" = "drivemotion" ]; then
             cp template_drivemotion.html template.html
-            echo "Selezionato template Automotive."
+            echo "Selezionato template Automotive (DriveMotion)."
           else
             cp template_hometour.html template.html
-            echo "Selezionato template Real Estate."
+            echo "Selezionato template Real Estate (HomeTour)."
           fi
 
       - name: Inject Data into Template
