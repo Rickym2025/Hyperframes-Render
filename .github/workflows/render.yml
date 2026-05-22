@@ -90,7 +90,9 @@ jobs:
           fi
 
       - name: Inject Data into Template
-        run: node injector.js
+        run: |
+          node injector.js
+          rm -f template.html # Elimina il template per non confondere Hyperframes
 
       - name: Render Video
         run: npx hyperframes render --output out.mp4
