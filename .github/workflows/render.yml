@@ -89,6 +89,16 @@ jobs:
             printf "{}" > public/input.json
           fi
 
+      - name: Select Template
+        run: |
+          if [ "${{ github.event.inputs.progetto }}" = "DriveMotion" ]; then
+            cp template_drivemotion.html template.html
+            echo "Selezionato template Automotive."
+          else
+            cp template_hometour.html template.html
+            echo "Selezionato template Real Estate."
+          fi
+
       - name: Inject Data into Template
         run: |
           node injector.js
